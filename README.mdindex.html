@@ -1,0 +1,249 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خط الأعداد التفاعلي - إشراف المعلمة سماح الزليطني</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #eef2f7; }
+        
+        .line-container {
+            height: 4px;
+            background: #333;
+            width: 100%;
+            position: relative;
+            margin: 50px 0;
+        }
+        
+        .tick {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: #333;
+            top: -5px;
+        }
+        
+        .tick-label {
+            position: absolute;
+            top: 15px;
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .marker {
+            position: absolute;
+            top: -18px;
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 3px solid #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .marker-a { border-color: #ef4444; color: #ef4444; }
+        .marker-b { border-color: #3b82f6; color: #3b82f6; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+        
+        <!-- Header Section -->
+        <div class="p-8 border-b border-gray-50 text-center">
+            <h1 class="text-4xl font-bold text-blue-900">خط الأعداد التفاعلي</h1>
+            <p class="text-blue-600 text-lg font-bold mt-2 italic">إشراف المعلمة: سماح الزليطني</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap justify-center gap-2 px-6 py-4 bg-gray-50 border-b border-gray-100">
+            <button onclick="switchMode('explore')" class="px-4 py-2 rounded-xl text-gray-500 hover:bg-gray-200 font-bold transition">الاستكشاف</button>
+            <button onclick="switchMode('inverse')" class="px-4 py-2 rounded-xl text-red-600 border border-red-100 hover:bg-red-50 font-bold">المعكوس</button>
+            <button onclick="switchMode('absolute')" class="px-4 py-2 rounded-xl text-purple-600 border border-purple-100 hover:bg-purple-50 font-bold">القيمة المطلقة</button>
+            <button onclick="switchMode('add')" class="px-4 py-2 rounded-xl text-green-600 border border-green-100 hover:bg-green-50 font-bold">الجمع</button>
+            <button onclick="switchMode('sub')" class="px-4 py-2 rounded-xl text-red-400 border border-red-50 hover:bg-red-50 font-bold">الطرح</button>
+            <button onclick="switchMode('compare')" id="btn-compare" class="px-6 py-2 rounded-xl bg-blue-800 text-white font-bold shadow-md">المقارنة</button>
+            <button onclick="switchMode('quiz')" class="px-4 py-2 rounded-xl bg-yellow-400 text-yellow-900 font-bold hover:bg-yellow-500 shadow-md">تحدي الذكاء</button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="p-8">
+            <div class="bg-blue-50 rounded-2xl p-6 text-center border border-blue-100 mb-10">
+                <h2 id="main-title" class="text-2xl font-bold text-blue-800">مقارنة الأعداد الصحيحة</h2>
+                <p id="main-desc" class="text-blue-500 text-sm mt-1">تحديد الأكبر والأصغر باستخدام التموضع على الخط</p>
+            </div>
+
+            <!-- Number Line -->
+            <div class="relative px-10 mb-20">
+                <div class="line-container" id="line-ui">
+                    <!-- Ticks and Labels will be generated here -->
+                </div>
+                <div id="marker-a" class="marker marker-a" style="left: 30%">أ</div>
+                <div id="marker-b" class="marker marker-b" style="left: 70%">ب</div>
+            </div>
+
+            <hr class="border-gray-200 mb-10">
+
+            <!-- Result Cards -->
+            <div id="controls-section" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card A -->
+                <div class="bg-red-50 border-2 border-red-100 rounded-2xl p-6 text-center shadow-sm">
+                    <h3 class="text-red-700 font-bold mb-4">العدد الأول (أ)</h3>
+                    <div class="flex items-center justify-center gap-4">
+                        <button onclick="changeVal('a', -1)" class="w-12 h-12 bg-white rounded-full shadow-md text-red-500 font-bold text-xl hover:bg-red-50 transition">-</button>
+                        <span id="val-a-text" class="text-4xl font-bold text-red-600 w-12">0</span>
+                        <button onclick="changeVal('a', 1)" class="w-12 h-12 bg-white rounded-full shadow-md text-red-500 font-bold text-xl hover:bg-red-50 transition">+</button>
+                    </div>
+                </div>
+
+                <!-- Comparison/Result Card -->
+                <div id="mid-card" class="bg-green-50 border-2 border-green-100 rounded-2xl p-6 text-center shadow-sm">
+                    <h3 id="mid-card-title" class="text-green-700 font-bold mb-4">العملية</h3>
+                    <div id="comparison-result" class="text-5xl font-bold text-green-600 mt-2">=</div>
+                </div>
+
+                <!-- Card B -->
+                <div class="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 text-center shadow-sm">
+                    <h3 class="text-blue-700 font-bold mb-4">العدد الثاني (ب)</h3>
+                    <div class="flex items-center justify-center gap-4">
+                        <button onclick="changeVal('b', -1)" class="w-12 h-12 bg-white rounded-full shadow-md text-blue-500 font-bold text-xl hover:bg-blue-50 transition">-</button>
+                        <span id="val-b-text" class="text-4xl font-bold text-blue-600 w-12">0</span>
+                        <button onclick="changeVal('b', 1)" class="w-12 h-12 bg-white rounded-full shadow-md text-blue-500 font-bold text-xl hover:bg-blue-50 transition">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Instructions -->
+        <div class="bg-gray-50 p-8 border-t border-gray-100">
+            <h3 class="text-blue-900 font-bold flex items-center gap-2 mb-4">
+                💡 خطوات التعلم (إشراف المعلمة سماح الزليطني):
+            </h3>
+            <div class="space-y-4 text-blue-800">
+                <div class="flex gap-3 border-r-4 border-blue-400 pr-4">
+                    <span class="font-bold">الخطوة ١:</span>
+                    <p>ضع العدد (أ) والعدد (ب) على الخط من خلال الضغط على (+) و (-).</p>
+                </div>
+                <div class="flex gap-3 border-r-4 border-blue-400 pr-4">
+                    <span class="font-bold">الخطوة ٢:</span>
+                    <p>العدد الموجود على اليمين هو دائماً الأكبر، واليسار هو الأصغر.</p>
+                </div>
+                <div class="mt-4 p-3 bg-white rounded-lg border border-blue-100 italic text-sm">
+                    <span class="font-bold text-blue-900">ملاحظة:</span>
+                    الصفر أكبر من أي عدد سالب، وأصغر من أي عدد موجب.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let valA = -2;
+        let valB = 3;
+        let currentMode = 'compare';
+        const MIN = -10;
+        const MAX = 10;
+
+        function initLine() {
+            const line = document.getElementById('line-ui');
+            for (let i = MIN; i <= MAX; i++) {
+                const pos = ((i - MIN) / (MAX - MIN)) * 100;
+                
+                const tick = document.createElement('div');
+                tick.className = 'tick';
+                tick.style.left = pos + '%';
+                line.appendChild(tick);
+
+                const label = document.createElement('div');
+                label.className = 'tick-label';
+                label.style.left = pos + '%';
+                label.innerText = i;
+                line.appendChild(label);
+            }
+            updateUI();
+        }
+
+        function changeVal(target, amount) {
+            if (target === 'a') {
+                valA = Math.min(MAX, Math.max(MIN, valA + amount));
+            } else {
+                valB = Math.min(MAX, Math.max(MIN, valB + amount));
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('val-a-text').innerText = valA;
+            document.getElementById('val-b-text').innerText = valB;
+
+            const posA = ((valA - MIN) / (MAX - MIN)) * 100;
+            const posB = ((valB - MIN) / (MAX - MIN)) * 100;
+
+            document.getElementById('marker-a').style.left = `calc(${posA}% - 20px)`;
+            document.getElementById('marker-b').style.left = `calc(${posB}% - 20px)`;
+
+            const resultDisplay = document.getElementById('comparison-result');
+            
+            if (currentMode === 'compare') {
+                if (valA > valB) resultDisplay.innerText = '>';
+                else if (valA < valB) resultDisplay.innerText = '<';
+                else resultDisplay.innerText = '=';
+            } else if (currentMode === 'add') {
+                resultDisplay.innerText = valA + valB;
+            } else if (currentMode === 'sub') {
+                resultDisplay.innerText = valA - valB;
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const title = document.getElementById('main-title');
+            const desc = document.getElementById('main-desc');
+            const midTitle = document.getElementById('mid-card-title');
+            
+            // Reset all buttons visual state (simulated)
+            
+            switch(mode) {
+                case 'compare': 
+                    title.innerText = 'مقارنة الأعداد الصحيحة';
+                    desc.innerText = 'تحديد الأكبر والأصغر باستخدام التموضع على الخط';
+                    midTitle.innerText = 'العملية';
+                    break;
+                case 'absolute': 
+                    title.innerText = 'القيمة المطلقة للأعداد';
+                    desc.innerText = 'المسافة التي يبعدها العدد عن الصفر (دائماً موجبة)';
+                    break;
+                case 'add': 
+                    title.innerText = 'عملية الجمع';
+                    midTitle.innerText = 'الناتج';
+                    break;
+                case 'sub': 
+                    title.innerText = 'عملية الطرح';
+                    midTitle.innerText = 'الناتج';
+                    break;
+                case 'quiz': 
+                    title.innerText = 'تحدي الذكاء';
+                    desc.innerText = 'هل تستطيع حل المسائل التالية؟';
+                    break;
+            }
+            updateUI();
+        }
+
+        window.onload = initLine;
+    </script>
+</body>
+</html>
+
+```
+
